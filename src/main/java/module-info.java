@@ -1,8 +1,5 @@
 module org.example.loggingpipeline {
-    requires javafx.controls;
-    requires javafx.fxml;
-
-
+    requires kafka.clients;
     opens org.example.loggingpipeline to javafx.fxml;
     exports org.example.loggingpipeline;
 }
