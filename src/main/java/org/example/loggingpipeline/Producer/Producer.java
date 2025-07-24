@@ -15,9 +15,7 @@ public class Producer {
         this.producer = producer;
     }
     public void sendMessage(ProducerRecord<String, String> message) {
-        this.properties.setProperty("bootstrap.servers", "localhost:9092");
-        this.properties.setProperty("key.serializer", StringSerializer.class.getName());
-        this.properties.setProperty("value.serializer", StringSerializer.class.getName());
+
         producer.send(message);
 
         producer.flush();
