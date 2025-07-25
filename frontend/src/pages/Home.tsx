@@ -2,12 +2,12 @@ import React, { useEffect, useState, useRef } from "react";
 import { Clock, Wifi, WifiOff, Trash2, Play, Pause } from "lucide-react";
 
 const Home = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any>([]);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
   const [isPaused, setIsPaused] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
-  const wsRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
+  const wsRef = useRef<any>(null);
+  const reconnectTimeoutRef = useRef<any>(null);
 
   const connectWebSocket = () => {
     try {
@@ -18,7 +18,7 @@ const Home = () => {
         console.log("WebSocket connected");
       };
 
-      wsRef.current.onmessage = (event) => {
+      wsRef.current.onmessage = (event: any) => {
         if (!isPaused) {
           try {
             const messageData = JSON.parse(event.data);
@@ -29,7 +29,7 @@ const Home = () => {
               raw: event.data,
             };
 
-            setMessages((prev) => [newMessage, ...prev.slice(0, 999)]); // Keep only last 1000 messages
+            setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]); // Keep only last 1000 messages
             setMessageCount((count) => count + 1);
           } catch (error) {
             // If not JSON, treat as plain text
@@ -39,7 +39,7 @@ const Home = () => {
               data: event.data,
               raw: event.data,
             };
-            setMessages((prev) => [newMessage, ...prev.slice(0, 999)]);
+            setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]);
             setMessageCount((count) => count + 1);
           }
         }
@@ -56,7 +56,7 @@ const Home = () => {
         }, 3000);
       };
 
-      wsRef.current.onerror = (error) => {
+      wsRef.current.onerror = (error: any) => {
         setConnectionStatus("error");
         console.error("WebSocket error:", error);
       };
@@ -88,11 +88,11 @@ const Home = () => {
     setIsPaused(!isPaused);
   };
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = (timestamp: any) => {
     return new Date(timestamp).toLocaleTimeString();
   };
 
-  const renderMessageContent = (message) => {
+  const renderMessageContent = (message: any) => {
     if (typeof message.data === "object") {
       return (
         <pre className="text-sm text-gray-700 overflow-x-auto bg-gray-50 p-2 rounded mt-1">
@@ -107,7 +107,7 @@ const Home = () => {
     );
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: any) => {
     switch (status) {
       case "connected":
         return "text-green-600";
@@ -120,7 +120,7 @@ const Home = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: any) => {
     return status === "connected" ? <Wifi size={16} /> : <WifiOff size={16} />;
   };
 
@@ -198,7 +198,7 @@ const Home = () => {
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {messages.map((message) => (
+              {messages.map((message: any) => (
                 <div key={message.id} className="p-4 hover:bg-gray-50">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
