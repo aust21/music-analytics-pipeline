@@ -31,3 +31,4 @@ services:
       KAFKA_BROKERS: broker:29092
     depends_on:
       - broker
+

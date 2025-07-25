@@ -19,7 +19,7 @@ public class Main {
 
         Producer producer = new Producer(properties, kafkaProducer);
 
-        ProducerRecord<String, String> record = new ProducerRecord<>("logging-topic", "Hello, Kafka!");
+        ProducerRecord<String, String> record = new ProducerRecord<>("analytics", "Hello, Kafka!");
         producer.sendMessage(record);
     }
 }
