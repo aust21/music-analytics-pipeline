@@ -35,11 +35,6 @@ build/
 .vscode/
 
 ### Mac OS ###
-<<<<<<< HEAD
 .DS_Store
 
-.idea
-.mvn
-=======
-.DS_Store
->>>>>>> master
+node_modules/
