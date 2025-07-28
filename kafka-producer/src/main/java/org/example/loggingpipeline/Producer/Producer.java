@@ -4,21 +4,22 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.example.loggingpipeline.Data.UserActivity;
 
 import java.util.Properties;
 import java.util.concurrent.Future;
 
 public class Producer {
     private Properties properties;
-    private KafkaProducer<String, String> producer;
+    private KafkaProducer<String, UserActivity> producer;
 
-    public Producer(Properties properties, KafkaProducer<String, String> producer) {
+    public Producer(Properties properties, KafkaProducer<String, UserActivity> producer) {
         this.properties = properties;
         this.producer = producer;
     }
-    public Future<RecordMetadata> sendMessage(ProducerRecord<String, String> message) {
-        System.out.println("Sending message: " + message.value());
-        return producer.send(message, (metadata, exception)-> {
+    public Future<RecordMetadata> sendMessage(String topic, String key, UserActivity message) {
+        ProducerRecord<String, UserActivity> record = new ProducerRecord<>(topic, key, message);
+        return producer.send(record, (metadata, exception)-> {
             if (exception != null) {
                 System.err.println("Errpr sending message: "+exception.getMessage());
             }else {
