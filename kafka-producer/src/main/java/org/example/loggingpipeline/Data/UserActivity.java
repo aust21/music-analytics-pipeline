@@ -1,6 +1,7 @@
 package org.example.loggingpipeline.Data;
 
 import java.time.Instant;
+import java.util.Random;
 
 public class UserActivity {
     private String userId;
@@ -11,12 +12,12 @@ public class UserActivity {
 
     public UserActivity() {
         this.timestamp = Instant.now().toEpochMilli();
+        this.action = new String[]{"playing", "paused", "stopped"}[new Random().nextInt(3)];
     }
 
-    public UserActivity(String userId, String action, Song song, String sessionId) {
+    public UserActivity(String userId, Song song, String sessionId) {
         this();
         this.userId = userId;
-        this.action = action;
         this.sessionId = sessionId;
         this.song = song;
     }

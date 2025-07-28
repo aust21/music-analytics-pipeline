@@ -32,19 +32,18 @@ public class Main {
         SongGenerator songGenerator = new SongGenerator();
 
         try {
-            
+
             for (int i = 0; i < 5; i++) {
                 Song randomSong = songGenerator.generateRandomSong();
                 UserActivity activity = new UserActivity(
                         "user" + (i + 1),
-                        "playing",
                         randomSong,
                         "asdfds"
                 );
 
-                System.out.println("Generated activity: " + activity);
+//                System.out.println("Generated activity: " + activity);
                 String jsonMessage = JsonUtil.toJson(activity);
-                System.out.println(jsonMessage);
+//                System.out.println(jsonMessage);
                 producer.sendMessage("analytics", activity.getUserId(), jsonMessage);
 
                 Thread.sleep(500);
