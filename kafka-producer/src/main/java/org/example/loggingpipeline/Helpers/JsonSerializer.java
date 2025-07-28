@@ -17,6 +17,7 @@ public class JsonSerializer<T> implements Serializer<T> {
             if (data == null) {
                 return null;
             }
+            System.out.println("Data being serialized "+ data);
             return objectMapper.writeValueAsBytes(data);
         } catch (Exception e) {
             throw new RuntimeException("Error serializing JSON message", e);

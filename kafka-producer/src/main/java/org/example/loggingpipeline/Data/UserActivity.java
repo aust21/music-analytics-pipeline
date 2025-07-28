@@ -1,5 +1,7 @@
 package org.example.loggingpipeline.Data;
 
+import java.time.Instant;
+
 public class UserActivity {
     private String userId;
     private String action;
@@ -7,7 +9,12 @@ public class UserActivity {
     private Song song;
     private long timestamp;
 
+    public UserActivity() {
+        this.timestamp = Instant.now().toEpochMilli();
+    }
+
     public UserActivity(String userId, String action, Song song, String sessionId) {
+        this();
         this.userId = userId;
         this.action = action;
         this.sessionId = sessionId;
@@ -56,11 +63,11 @@ public class UserActivity {
 
     @Override
     public String toString() {
-        return "UserActivity{" +
+        return "{" +
                 "userId='" + userId + '\'' +
                 ", action='" + action + '\'' +
                 ", sessionId='" + sessionId + '\'' +
                 ", timestamp=" + timestamp +
-                '}';
+                "}";
     }
 }

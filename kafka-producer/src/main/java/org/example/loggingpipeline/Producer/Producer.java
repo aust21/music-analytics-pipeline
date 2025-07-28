@@ -11,17 +11,17 @@ import java.util.concurrent.Future;
 
 public class Producer {
     private Properties properties;
-    private KafkaProducer<String, UserActivity> producer;
+    private KafkaProducer<String, String> producer;
 
-    public Producer(Properties properties, KafkaProducer<String, UserActivity> producer) {
+    public Producer(Properties properties, KafkaProducer<String, String> producer) {
         this.properties = properties;
         this.producer = producer;
     }
-    public Future<RecordMetadata> sendMessage(String topic, String key, UserActivity message) {
-        ProducerRecord<String, UserActivity> record = new ProducerRecord<>(topic, key, message);
+    public Future<RecordMetadata> sendMessage(String topic, String key, String message) {
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, message);
         return producer.send(record, (metadata, exception)-> {
             if (exception != null) {
-                System.err.println("Errpr sending message: "+exception.getMessage());
+                System.err.println("Error sending message: "+exception.getMessage());
             }else {
                 System.out.println("Message sent successfully to topic: "+metadata.topic() +
                         " partition: " + metadata.partition() +

@@ -6,6 +6,7 @@ import org.example.loggingpipeline.Data.Song;
 import org.example.loggingpipeline.Data.SongGenerator;
 import org.example.loggingpipeline.Data.UserActivity;
 import org.example.loggingpipeline.Helpers.JsonSerializer;
+import org.example.loggingpipeline.Helpers.JsonUtil;
 import org.example.loggingpipeline.Producer.Producer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -19,32 +20,34 @@ public class Main {
 
         properties.setProperty("bootstrap.servers", "localhost:9092");
         properties.setProperty("key.serializer", StringSerializer.class.getName());
-        properties.setProperty("value.serializer", JsonSerializer.class.getName());
+        properties.setProperty("value.serializer", StringSerializer.class.getName());
         properties.setProperty("acks", "all");
         properties.setProperty("retries", "3");
         properties.setProperty("buffer.memory", "33554432");
         properties.setProperty("linger.ms", "1");
         properties.setProperty("batch.size", "16384");
 
-        KafkaProducer<String, UserActivity> kafkaProducer = new KafkaProducer<>(properties);
+        KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(properties);
         Producer producer = new Producer(properties, kafkaProducer);
         SongGenerator songGenerator = new SongGenerator();
 
         try {
-            // Generate multiple random activities
+            
             for (int i = 0; i < 5; i++) {
                 Song randomSong = songGenerator.generateRandomSong();
                 UserActivity activity = new UserActivity(
                         "user" + (i + 1),
                         "playing",
                         randomSong,
-                        ""
+                        "asdfds"
                 );
 
                 System.out.println("Generated activity: " + activity);
-                producer.sendMessage("analytics", activity.getUserId(), activity);
+                String jsonMessage = JsonUtil.toJson(activity);
+                System.out.println(jsonMessage);
+                producer.sendMessage("analytics", activity.getUserId(), jsonMessage);
 
-                Thread.sleep(500); // Small delay between messages
+                Thread.sleep(500);
             }
 
             producer.flush();
