@@ -1,17 +1,17 @@
 import { Trash2 } from "lucide-react";
 
-const Controls = ({ togglePause, isPaused, clearMessages }: any) => {
+const Controls = ({ toggleDataView, isRawData, clearMessages }: any) => {
   return (
     <div className="flex items-center space-x-3 mt-4">
       <button
-        onClick={togglePause}
+        onClick={toggleDataView}
         className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium ${
-          isPaused
+          isRawData
             ? "bg-green-100 text-green-700 hover:bg-green-200"
             : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
         }`}
       >
-        <span>{isPaused ? "Pretty data" : "Raw data"}</span>
+        <span>{isRawData ? "Pretty data" : "Raw data"}</span>
       </button>
 
       <button

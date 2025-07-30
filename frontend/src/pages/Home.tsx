@@ -3,11 +3,12 @@ import { Clock, Wifi, WifiOff, Trash2, Play, Pause } from "lucide-react";
 import JsonRender from "../components/JsonRender";
 import Controls from "../components/Controls";
 import Header from "../components/Header";
+import SimplifiedData from "../components/SimplifiedData";
 
 const Home = () => {
   const [messages, setMessages] = useState<any>([]);
   const [connectionStatus, setConnectionStatus] = useState("disconnected");
-  const [isPaused, setIsPaused] = useState(false);
+  const [isRawData, setIsRawData] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const wsRef = useRef<any>(null);
   const reconnectTimeoutRef = useRef<any>(null);
@@ -22,29 +23,27 @@ const Home = () => {
       };
 
       wsRef.current.onmessage = (event: any) => {
-        if (!isPaused) {
-          try {
-            const messageData = JSON.parse(event.data);
-            const newMessage = {
-              id: Date.now() + Math.random(),
-              timestamp: new Date().toISOString(),
-              data: messageData,
-              raw: event.data,
-            };
+        try {
+          const messageData = JSON.parse(event.data);
+          const newMessage = {
+            id: Date.now() + Math.random(),
+            timestamp: new Date().toISOString(),
+            data: messageData,
+            raw: event.data,
+          };
 
-            setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]);
-            setMessageCount((count) => count + 1);
-          } catch (error) {
-            // If not JSON, treat as plain text
-            const newMessage = {
-              id: Date.now() + Math.random(),
-              timestamp: new Date().toISOString(),
-              data: event.data,
-              raw: event.data,
-            };
-            setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]);
-            setMessageCount((count) => count + 1);
-          }
+          setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]);
+          setMessageCount((count) => count + 1);
+        } catch (error) {
+          // If not JSON, treat as plain text
+          const newMessage = {
+            id: Date.now() + Math.random(),
+            timestamp: new Date().toISOString(),
+            data: event.data,
+            raw: event.data,
+          };
+          setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]);
+          setMessageCount((count) => count + 1);
         }
       };
 
@@ -87,8 +86,8 @@ const Home = () => {
     setMessageCount(0);
   };
 
-  const togglePause = () => {
-    setIsPaused(!isPaused);
+  const toggleDataView = () => {
+    setIsRawData(!isRawData);
   };
 
   const formatTimestamp = (timestamp: any) => {
@@ -166,7 +165,7 @@ const Home = () => {
               {keys.map((key) => (
                 <div key={key} className="mb-1">
                   <span className="text-orange-600 font-medium mr-1">
-                    "{key}"
+                    {key}
                   </span>
                   <span className="text-gray-500 mr-2">:</span>
                   <JsonRenderer data={data[key]} depth={depth + 1} />
@@ -182,17 +181,74 @@ const Home = () => {
     return <span className="text-gray-700">{String(data)}</span>;
   };
 
-  const renderMessageContent = (message: any) => {
-    if (typeof message.data === "object") {
-      return (
-        <div className="text-sm bg-gray-50 p-3 rounded mt-1 max-w-full overflow-hidden">
-          <JsonRenderer data={message.data} />
-        </div>
-      );
+  const RenderSimplifiedData = ({ data }: any) => {
+    let parsedData;
+    try {
+      if (typeof data === "string" && data.trim() !== "") {
+        parsedData = JSON.parse(data);
+      } else {
+        parsedData = null;
+      }
+    } catch (e) {
+      console.error("Failed to parse JSON:", e);
+      parsedData = null;
     }
+    if (data === null)
+      return <span className="text-gray-500 italic">null</span>;
+    if (data === undefined)
+      return <span className="text-gray-500 italic">undefined</span>;
+
     return (
-      <div className="text-sm text-gray-700 mt-1 break-words overflow-wrap-anywhere max-w-full font-mono bg-gray-50 p-2 rounded">
-        {message.data}
+      <div className="max-w-md">
+
+        <div className="space-y-4">
+          <div className="flex gap-3 items-baseline">
+            <p className="text-gray-600 font-medium min-w-[80px]">User ID:</p>
+            <span className="text-green-600 font-mono">
+              {parsedData?.userId ?? "No user ID"}
+            </span>
+          </div>
+
+          <div className="flex gap-3 items-baseline">
+            <p className="text-gray-600 font-medium min-w-[80px]">Artist:</p>
+            <span className="text-green-600">
+              {parsedData?.song.title ? (
+                <>
+                  {parsedData.song.title} by {parsedData.song.artist}
+                </>
+              ) : (
+                "N/A"
+              )}
+            </span>
+          </div>
+
+          <div className="flex gap-3 items-baseline">
+            <p className="text-gray-600 font-medium min-w-[80px]">Album:</p>
+            <span className="text-green-600">
+              {parsedData?.song.album ?? "N/A"}
+            </span>
+          </div>
+
+          <div className="flex gap-3 items-baseline">
+            <p className="text-gray-600 font-medium min-w-[80px]">Action:</p>
+            <span className="text-green-600 capitalize">
+              {parsedData?.action ?? "N/A"}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Usage in your component:
+  const renderMessageContent = (message: any) => {
+    return (
+      <div className="text-sm bg-gray-50 p-3 rounded mt-1 max-w-full overflow-hidden">
+        {isRawData ? (
+          <JsonRenderer data={message.data} />
+        ) : (
+          <RenderSimplifiedData data={message.data["value"]} />
+        )}
       </div>
     );
   };
@@ -209,20 +265,29 @@ const Home = () => {
 
           {/* Controls */}
           <Controls
-            togglePause={togglePause}
-            isPaused={isPaused}
+            toggleDataView={toggleDataView}
+            isRawData={isRawData}
             clearMessages={clearMessages}
           />
         </div>
 
-        {/* Messages */}
-        <JsonRender
-          messages={messages}
-          connectionStatus={connectionStatus}
-          formatTimestamp={formatTimestamp}
-          messageCount={messageCount}
-          renderMessageContent={renderMessageContent}
-        />
+        {isRawData ? (
+          <JsonRender
+            messages={messages}
+            connectionStatus={connectionStatus}
+            formatTimestamp={formatTimestamp}
+            messageCount={messageCount}
+            renderMessageContent={renderMessageContent}
+          />
+        ) : (
+          <SimplifiedData
+            messages={messages}
+            connectionStatus={connectionStatus}
+            formatTimestamp={formatTimestamp}
+            messageCount={messageCount}
+            renderMessageContent={renderMessageContent}
+          />
+        )}
 
         {/* Footer info */}
         <div className="mt-4 text-center text-xs text-gray-500">
