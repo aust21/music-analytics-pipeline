@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Clock, Wifi, WifiOff, Trash2, Play, Pause } from "lucide-react";
+import JsonRender from "../components/JsonRender";
+import Controls from "../components/Controls";
+import Header from "../components/Header";
 
 const Home = () => {
   const [messages, setMessages] = useState<any>([]);
@@ -92,36 +95,106 @@ const Home = () => {
     return new Date(timestamp).toLocaleTimeString();
   };
 
+  // Component to render JSON as interactive tree
+  const JsonRenderer = ({ data, depth = 0 }: { data: any; depth?: number }) => {
+    const [collapsed, setCollapsed] = useState(depth > 2); // Auto-collapse deep levels
+
+    if (data === null)
+      return <span className="text-gray-500 italic">null</span>;
+    if (data === undefined)
+      return <span className="text-gray-500 italic">undefined</span>;
+
+    // Primitive types
+    if (typeof data === "string") {
+      return <span className="text-green-600">"{data}"</span>;
+    }
+    if (typeof data === "number") {
+      return <span className="text-blue-600">{data}</span>;
+    }
+    if (typeof data === "boolean") {
+      return <span className="text-purple-600">{data.toString()}</span>;
+    }
+
+    // Arrays
+    if (Array.isArray(data)) {
+      if (data.length === 0) return <span className="text-gray-500">[]</span>;
+
+      return (
+        <div className="inline-block">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="text-gray-600 hover:text-gray-800 focus:outline-none"
+          >
+            <span className="mr-1">{collapsed ? "▶" : "▼"}</span>
+            <span className="text-gray-500">[{data.length}]</span>
+          </button>
+          {!collapsed && (
+            <div className="ml-4 mt-1 border-l-2 border-gray-200 pl-2">
+              {data.map((item, index) => (
+                <div key={index} className="mb-1">
+                  <span className="text-gray-400 text-xs mr-2">{index}:</span>
+                  <JsonRenderer data={item} depth={depth + 1} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Objects
+    if (typeof data === "object") {
+      const keys = Object.keys(data);
+      if (keys.length === 0)
+        return <span className="text-gray-500">{"{}"}</span>;
+
+      return (
+        <div className="inline-block">
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="text-gray-600 hover:text-gray-800 focus:outline-none"
+          >
+            <span className="mr-1">{collapsed ? "▶" : "▼"}</span>
+            <span className="text-gray-500">
+              {"{"}
+              {keys.length}
+              {"}"}
+            </span>
+          </button>
+          {!collapsed && (
+            <div className="ml-4 mt-1 border-l-2 border-gray-200 pl-2">
+              {keys.map((key) => (
+                <div key={key} className="mb-1">
+                  <span className="text-orange-600 font-medium mr-1">
+                    "{key}"
+                  </span>
+                  <span className="text-gray-500 mr-2">:</span>
+                  <JsonRenderer data={data[key]} depth={depth + 1} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Fallback
+    return <span className="text-gray-700">{String(data)}</span>;
+  };
+
   const renderMessageContent = (message: any) => {
     if (typeof message.data === "object") {
       return (
-        <pre className="text-sm text-gray-700 bg-gray-50 p-2 rounded mt-1 whitespace-pre-wrap break-words overflow-wrap-anywhere max-w-full">
-          {JSON.stringify(message.data, null, 2)}
-        </pre>
+        <div className="text-sm bg-gray-50 p-3 rounded mt-1 max-w-full overflow-hidden">
+          <JsonRenderer data={message.data} />
+        </div>
       );
     }
     return (
-      <div className="text-sm text-gray-700 mt-1 break-words">
+      <div className="text-sm text-gray-700 mt-1 break-words overflow-wrap-anywhere max-w-full font-mono bg-gray-50 p-2 rounded">
         {message.data}
       </div>
     );
-  };
-
-  const getStatusColor = (status: any) => {
-    switch (status) {
-      case "connected":
-        return "text-green-600";
-      case "disconnected":
-        return "text-red-600";
-      case "error":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  const getStatusIcon = (status: any) => {
-    return status === "connected" ? <Wifi size={16} /> : <WifiOff size={16} />;
   };
 
   return (
@@ -129,96 +202,27 @@ const Home = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Kafka Message Stream
-              </h1>
-              <p className="text-gray-600 mt-1">Topic: music-analytics</p>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <div
-                className={`flex items-center space-x-2 ${getStatusColor(
-                  connectionStatus
-                )}`}
-              >
-                {getStatusIcon(connectionStatus)}
-                <span className="font-medium capitalize">
-                  {connectionStatus}
-                </span>
-              </div>
-
-              <div className="text-sm text-gray-600">
-                Messages: <span className="font-medium">{messageCount}</span>
-              </div>
-            </div>
-          </div>
+          <Header
+            connectionStatus={connectionStatus}
+            messageCount={messageCount}
+          />
 
           {/* Controls */}
-          <div className="flex items-center space-x-3 mt-4">
-            <button
-              onClick={togglePause}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md font-medium ${
-                isPaused
-                  ? "bg-green-100 text-green-700 hover:bg-green-200"
-                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-              }`}
-            >
-              {isPaused ? <Play size={16} /> : <Pause size={16} />}
-              <span>{isPaused ? "Resume" : "Pause"}</span>
-            </button>
-
-            <button
-              onClick={clearMessages}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-100 text-red-700 rounded-md font-medium hover:bg-red-200"
-            >
-              <Trash2 size={16} />
-              <span>Clear</span>
-            </button>
-
-            {isPaused && (
-              <div className="text-sm text-yellow-600 font-medium">
-                Stream paused - new messages are being buffered
-              </div>
-            )}
-          </div>
+          <Controls
+            togglePause={togglePause}
+            isPaused={isPaused}
+            clearMessages={clearMessages}
+          />
         </div>
 
         {/* Messages */}
-        <div className="bg-white rounded-lg shadow-sm">
-          {messages.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              <div className="text-lg font-medium">No messages yet</div>
-              <div className="text-sm mt-1">
-                {connectionStatus === "connected"
-                  ? "Waiting for messages from Kafka topic..."
-                  : "Connecting to WebSocket server..."}
-              </div>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {messages.map((message: any) => (
-                <div key={message.id} className="p-4 hover:bg-gray-50">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <Clock size={14} className="text-gray-400" />
-                        <span className="text-xs text-gray-500 font-mono">
-                          {formatTimestamp(message.timestamp)}
-                        </span>
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                          #{messageCount - messages.indexOf(message)}
-                        </span>
-                      </div>
-                      {renderMessageContent(message)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <JsonRender
+          messages={messages}
+          connectionStatus={connectionStatus}
+          formatTimestamp={formatTimestamp}
+          messageCount={messageCount}
+          renderMessageContent={renderMessageContent}
+        />
 
         {/* Footer info */}
         <div className="mt-4 text-center text-xs text-gray-500">
