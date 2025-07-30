@@ -29,7 +29,7 @@ const Home = () => {
               raw: event.data,
             };
 
-            setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]); // Keep only last 1000 messages
+            setMessages((prev: any) => [newMessage, ...prev.slice(0, 999)]);
             setMessageCount((count) => count + 1);
           } catch (error) {
             // If not JSON, treat as plain text
@@ -95,7 +95,7 @@ const Home = () => {
   const renderMessageContent = (message: any) => {
     if (typeof message.data === "object") {
       return (
-        <pre className="text-sm text-gray-700 overflow-x-auto bg-gray-50 p-2 rounded mt-1">
+        <pre className="text-sm text-gray-700 bg-gray-50 p-2 rounded mt-1 whitespace-pre-wrap break-words overflow-wrap-anywhere max-w-full">
           {JSON.stringify(message.data, null, 2)}
         </pre>
       );
@@ -125,7 +125,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen bg-gray-100 p-4 overflow-x-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
