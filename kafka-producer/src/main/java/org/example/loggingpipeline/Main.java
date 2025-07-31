@@ -33,12 +33,14 @@ public class Main {
 
         try {
 
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 100; i++) {
                 Song randomSong = songGenerator.generateRandomSong();
+                String sessionId = UUID.randomUUID().toString();
+                String userId = UUID.randomUUID().toString();
                 UserActivity activity = new UserActivity(
-                        "user" + (i + 1),
+                        userId,
                         randomSong,
-                        "asdfds"
+                        sessionId
                 );
 
 //                System.out.println("Generated activity: " + activity);

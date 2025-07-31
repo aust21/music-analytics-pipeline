@@ -11,7 +11,7 @@ const Controls = ({ toggleDataView, isRawData, clearMessages }: any) => {
             : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
         }`}
       >
-        <span>{isRawData ? "Pretty data" : "Raw data"}</span>
+        <span>{isRawData ? "Switch to simple view" : "View Raw data"}</span>
       </button>
 
       <button
