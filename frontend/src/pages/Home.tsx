@@ -15,7 +15,7 @@ const Home = () => {
 
   const connectWebSocket = () => {
     try {
-      wsRef.current = new WebSocket("ws://localhost:5000");
+      wsRef.current = new WebSocket("ws://localhost:3000");
 
       wsRef.current.onopen = () => {
         setConnectionStatus("connected");

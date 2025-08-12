@@ -1,10 +1,19 @@
 const { Kafka } = require("kafkajs");
 const WebSocket = require("ws");
 
+// Get configuration from environment variables
+const KAFKA_BROKERS = process.env.KAFKA_BROKER
+  ? [process.env.KAFKA_BROKER]
+  : ["localhost:9092"];
+const WS_PORT = process.env.WS_PORT || 3000;
+
+console.log(`Kafka brokers: ${KAFKA_BROKERS.join(", ")}`);
+console.log(`WebSocket port: ${WS_PORT}`);
+
 // Kafka configuration
 const kafka = new Kafka({
   clientId: "kafka-ui-consumer",
-  brokers: ["localhost:9092"],
+  brokers: KAFKA_BROKERS,
   retry: {
     initialRetryTime: 100,
     retries: 8,
@@ -20,7 +29,7 @@ const consumer = kafka.consumer({
 
 // WebSocket server
 const wss = new WebSocket.Server({
-  port: 5000,
+  port: WS_PORT,
   perMessageDeflate: false,
 });
 
@@ -56,10 +65,10 @@ async function run() {
     await consumer.connect();
     console.log("Connected to Kafka");
 
-    console.log("Subscribing to topic: music-analytics");
+    console.log("Subscribing to topic: analytics");
     await consumer.subscribe({
       topic: "analytics",
-      fromBeginning: true, // Change to true if you want historical messages
+      fromBeginning: true,
     });
 
     console.log("Starting consumer...");
@@ -173,5 +182,5 @@ process.on("unhandledRejection", (reason, promise) => {
 // Start the consumer
 run().catch(console.error);
 
-console.log("WebSocket server running on ws://localhost:5000");
-console.log("Waiting for Kafka messages on topic: music-analytics");
+console.log(`WebSocket server running on ws://localhost:${WS_PORT}`);
+console.log("Waiting for Kafka messages on topic: analytics");

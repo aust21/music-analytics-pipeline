@@ -63,7 +63,7 @@ services:
       dockerfile: Dockerfile
     container_name: node-server
     ports:
-      - "3001:3000"  # Adjust port as needed
+      - "3000:3000"  # Adjust port as needed
     environment:
       - NODE_ENV=production
       - KAFKA_BROKER=broker:29092

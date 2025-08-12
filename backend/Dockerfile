@@ -1,35 +1,16 @@
-# Dockerfile for Node.js Server
-FROM node:20 as build
+# Use the same Node version you're using locally
+FROM node:20
 
 WORKDIR /app
 
-# Copy package files
+# First copy only package files for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including devDependencies for now)
+RUN npm install
 
-# Copy source code
+# Then copy the rest of the files
 COPY . .
 
-# Production stage
-FROM node:20-slim
-
-WORKDIR /app
-
-# Create non-root user for security
-RUN groupadd -r nodeuser && useradd -r -g nodeuser nodeuser
-
-
-# Switch to non-root user
-USER nodeuser
-
-# Expose the port your app runs on
-EXPOSE 5000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:5000/health || exit 1
-
-# Start the application
-CMD ["npm", "start"]
+# Explicitly set the start command
+CMD ["node", "server.js"] 
