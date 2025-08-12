@@ -3,6 +3,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.errors.TopicExistsException;
 import org.example.loggingpipeline.Data.Song;
 import org.example.loggingpipeline.Data.SongGenerator;
 import org.example.loggingpipeline.Data.UserActivity;
@@ -50,6 +51,11 @@ public class Main {
                 createTopic(adminClient);
                 topicCreated = true;
             } catch (Exception e) {
+                if (e.getCause() instanceof TopicExistsException) {
+                    System.out.println("Topic already exists, continuing...");
+                    topicCreated = true;
+                    break;
+                }
                 retryCount++;
                 System.out.println("Failed to create topic, retry " + retryCount + "/" + maxRetries);
                 if (retryCount < maxRetries) {
