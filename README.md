@@ -92,8 +92,6 @@ npm start
 2. **Docker logs**: `docker logs kafka-producer` to see event generation
 3. **WebSocket logs**: `docker logs node-server` for consumer activity
 
-````
-
 ---
 
 ## 🔧 Development
